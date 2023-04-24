@@ -1,73 +1,47 @@
-#include <bits/stdc++.h>
-
+#include<bits/stdc++.h>
 using namespace std;
-
-#define N 26
-
-int decrypt( int cip, int a, int b, int g) {
-	int a_inverse = calc_inverse(a);
-	int p;
-
-	return p;
+static int a = 7;
+static int b = 6;
+string encryption(string m) {
+  
+   string c = "";
+   for (int i = 0; i < m.length(); i++) {
+      
+      if(m[i]!=' ')
+        
+         c = c + (char) ((((a * (m[i]-'A') ) + b) % 26) + 'A');
+      else
+        
+         c += m[i];
+   }
+   return c;
 }
-
-int encrypt( string p, int a, int b, int g, int n) {
-	int p_num = 0, i = 0, temp;
-	int len = p.length();
-
-	while (i < len) {
-		temp = 0;
-		for ( int j = 0; j < g; j++) {
-			temp += (p[i + j] - 'a') * pow(N, g - 1 - j);
-		}
-		cout << temp;
-		p_num += temp;
-		i += g;
-	}
-
-	int res = (a * p_num + b) % n;
-
-	return res;
+string decryption(string c) {
+   string m = "";
+   int a_inverse = 0;
+   int flag = 0;
+  
+   for (int i = 0; i < 26; i++) {
+      flag = (a * i) % 26;
+      
+      if (flag == 1) {
+         a_inverse = i;
+      }
+   }
+   for (int i = 0; i < c.length(); i++) {
+      if(c[i] != ' ')
+       
+         m = m + (char) (((a_inverse * ((c[i]+'A' - b)) % 26)) + 'A');
+      else
+         
+         m += c[i];
+   }
+   return m;
 }
-
-string convert_to_text(int cip) {
-	string cipher_text;
-
-	while (cip > N) {
-		int t = cip % N;
-		cipher_text.push_back(char('a' + t));
-		cip = cip / N;
-	}
-
-	cipher_text.push_back(char('a' + cip));
-
-	reverse(cipher_text.begin(), cipher_text.end());
-
-	return cipher_text;
-}
-
-int main() {
-	string p;
-	cout << "Enter string: ";
-	cin >> p;
-
-	/**
-	 * c = (ap + b) mod n
-	 * 
-	 * g -> single, digraph, trigraph etc.
-	 **/
-	int a, b, g, n;
-	cout << "Enter a, b, g: ";
-	cin >> a >> b >> g;
-
-	int l = p.length();
-	n = pow(N, g);
-
-	int c = encrypt( p, a, b, g, n);
-	cout << "\nEncrypted cipher value: "<< c;
-	cout << "\nEncrypted cipher text: " << convert_to_text(c);
-
-	cout << "\n";
-
-	return 0;
+int main(void) {
+   string msg = "HELLO WORLD";
+   string c = encryption(msg);
+   cout << "Encrypted Message is : " << c<<endl;
+   cout << "Decrypted Message is: " << decryption(c);
+   return 0;
 }
