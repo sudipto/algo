@@ -1,44 +1,118 @@
 #include <bits/stdc++.h>
 using namespace std;
+set<int>
+    prime;
+int public_key;
+int private_key;
+int n;
 
-int inv(int a,int n) {
-	for(int i=0;;i++) {
-		if((n*i+1)%a==0) {return (n*i+1)/a;}
-	}
-	return -1;
+void primefiller()
+{
+
+    vector<bool> seive(250, true);
+    seive[0] = false;
+    seive[1] = false;
+    for (int i = 2; i < 250; i++) {
+        for (int j = i * 2; j < 250; j += i) {
+            seive[j] = false;
+        }
+    }
+    for (int i = 0; i < seive.size(); i++) {
+        if (seive[i])
+            prime.insert(i);
+    }
+}
+// picking a random prime number and erasing that prime
+// number from list because p!=q
+int pickrandomprime()
+{
+    int k = rand() % prime.size();
+    auto it = prime.begin();
+    while (k--)
+        it++;
+    int ret = *it;
+    prime.erase(it);
+    return ret;
+}
+void setkeys()
+{
+    int prime1 = pickrandomprime(); // first prime number
+    int prime2 = pickrandomprime(); // second prime number
+    // to check the prime numbers selected
+    // cout<<prime1<<" "<<prime2<<endl;
+    n = prime1 * prime2;
+    int fi = (prime1 - 1) * (prime2 - 1);
+    int e = 2;
+    while (1) {
+        if (__gcd(e, fi) == 1)
+            break;
+        e++;
+    } // d = (k*Φ(n) + 1) / e for some integer k
+    public_key = e;
+    int d = 2;
+    while (1) {
+        if ((d * e) % fi == 1)
+            break;
+        d++;
+    }
+    private_key = d;
 }
 
-int pow(int a,int b,int n) {
-	int ans=1;
-	for(int i=0;i<b;i++) {
-		ans=ans*a;
-		ans=ans%n;
-	}
-	return ans;
+long long int encrypt(double message)
+{
+    int e = public_key;
+    long long int encrpyted_text = 1;
+    while (e--) {
+        encrpyted_text *= message;
+        encrpyted_text %= n;
+    }
+    return encrpyted_text;
 }
 
-int main() {
-	int p,q;
-	cin>>p;
-	cin>>q;
-	int n=p*q;
-	int phi=(p-1)*(q-1);
-	string in;
-	cin>>in;
-	int len=in.size();
-	cout<<"Message: "<<in<<'\n';
-	int e=17;
-	int d=inv(e,phi);
-	string cipher="",plain="";
-	for(int i=0;i<len;i++){
-		long c=(long)pow(in[i]-65,e,n)%n;
-		cipher+=(char)(c+'A');
-	}
-	for(int i=0;i<len;i++){
-		long pl=(long)pow(cipher[i]-'A',d,n)%n;
-		plain+=(char)(pl+'A');
-	}
-	cout<<plain;
-
-	return 0;
+long long int decrypt(int encrpyted_text)
+{
+    int d = private_key;
+    long long int decrypted = 1;
+    while (d--) {
+        decrypted *= encrpyted_text;
+        decrypted %= n;
+    }
+    return decrypted;
+}
+// first converting each character to its ASCII value and
+// then encoding it then decoding the number to get the
+// ASCII and converting it to character
+vector<int> encoder(string message)
+{
+    vector<int> form;
+    for (auto& letter : message)
+        form.push_back(encrypt((int)letter));
+    return form;
+}
+string decoder(vector<int> encoded)
+{
+    string s;
+ 
+    for (auto& num : encoded)
+        s += decrypt(num);
+    return s;
+}
+int main()
+{
+    primefiller();
+    setkeys();
+    string message = "i am a beast Message";
+    // uncomment below for manual input
+    // cout<<"enter the message\n";getline(cin,message);
+    // calling the encoding function
+    vector<int> coded = encoder(message);
+    cout << "Initial message:\n" << message;
+    cout << "\n\nThe encoded message(encrypted by public "
+            "key)\n";
+    for (auto& p : coded)
+        cout << p;
+    cout << "\n\nThe decoded message(decrypted by private "
+            "key)\n";
+    cout << decoder(coded) << endl;
+    return 0;
 }
